@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'users',
     "interactions",
     "payments",
+    'rest_framework.authtoken',  # Optional if you're using token-based auth too
+    'social_django',
 ]
 
 MIDDLEWARE = [
@@ -128,3 +130,41 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+AUTH_USER_MODEL = 'users.User'
+
+
+# REST framework settings for JWT
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+# Simple JWT Settings
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': 'your-secret-key',  # Replace with a secure secret
+}
+
+
+AUTHENTICATION_BACKENDS = (
+   
+    'social_core.backends.google.GoogleOAuth2',  # Google OAuth2
+    'social_core.backends.facebook.FacebookOAuth2',  # Facebook OAuth2 (optional)
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+# Social Account Providers (e.g., Google, GitHub)
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = 'your-client-id'  # Obtain this from Google Developer Console
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'your-client-secret'
+
+# Redirect URL after successful login (usually the homepage or dashboard)
+LOGIN_REDIRECT_URL = '/'
