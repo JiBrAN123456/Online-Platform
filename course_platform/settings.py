@@ -38,6 +38,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "courses",
+    'users',
+    "interactions",
+    "payments",
 ]
 
 MIDDLEWARE = [
@@ -74,9 +77,13 @@ WSGI_APPLICATION = "course_platform.wsgi.application"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'course_platform_db',
+        'USER': 'yunis',
+        'PASSWORD': 'yunis',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
