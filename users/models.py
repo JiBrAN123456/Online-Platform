@@ -1,5 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+import pyotp
+
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password = None, role = "student" , **extra_fields):
@@ -32,12 +34,25 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
     is_verified = models.BooleanField(default=False)
+    is_2fa_enabled = models.BooleanField(default=False)
+    otp_secret = models.CharField(max_length=16, blank=True, null=True)
+
 
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ['role']
         
     objects = UserManager()
+
+
+    def save(self, *args,**kwargs):
+        if self.is_2fa_enabled and not self.otp_secret:
+            self.otp_secret = pyotp.random_base32()
+        super().save(*args,**kwargs)
+
+    def get_totp_uri(self):
+        return pyotp.totp.TOTP(self.otp_secret).provisioning_uri(name=self.email, issuer_name="OnlineCoursePlatform")        
+
 
     def __str__(self):
         return f"{self.username} ({self.role})"
