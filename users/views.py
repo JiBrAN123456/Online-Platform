@@ -3,10 +3,12 @@ from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .serializers import RegisterSerializer, LoginSerializer, JWTTokenSerializer
+from rest_framework.permissions import AllowAny
 
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
+    permission_classes = [AllowAny]
 
 
 
