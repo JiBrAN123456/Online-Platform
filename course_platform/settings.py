@@ -168,3 +168,7 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'your-client-secret'
 
 # Redirect URL after successful login (usually the homepage or dashboard)
 LOGIN_REDIRECT_URL = '/'
+
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "no-reply@yourplatform.com"
