@@ -4,7 +4,9 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .serializers import RegisterSerializer, LoginSerializer, JWTTokenSerializer
 from rest_framework.permissions import AllowAny
-
+from rest_framework.views import APIView
+from .utils import verify_token
+from .models import User
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
@@ -26,3 +28,18 @@ class LoginView(generics.GenericAPIView):
 
                })
           return Response(serializer.errors ,status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+class VerifyEmailView(APIView):
+     def get(self, request):
+         token = request.GET.get("token")
+         email = verify_token(token)
+         if email:
+              user = User.objects.filter(email=email).first()
+              if user and not user.is_verified:
+                 user.is_verified = True
+                 user.save()
+                 return Response({"detail" : "Email Verified"})
+              return Response({"detail":"Invalid or expired token"}, status=status.HTTP_400_BAD_REQUEST)  
