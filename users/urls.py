@@ -1,5 +1,7 @@
 from django.urls import path, include
-from .views import RegisterView, LoginView , VerifyEmailView
+from .views import (RegisterView, LoginView , VerifyEmailView ,TwoFactorSetupView, TwoFactorVerifyView,
+    PasswordResetRequestView, PasswordResetConfirmView , PasswordResetRequestView,
+    ChangePasswordView )
 
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
@@ -7,4 +9,9 @@ urlpatterns = [
     path('auth/', include('social_django.urls', namespace='social')),
     #path('auth/', include('rest_framework_social_oauth2.urls')),  # OAuth2 endpoints
     path("verify-email/", VerifyEmailView.as_view(), name="verify-email"),
+    path("2fa/setup/", TwoFactorSetupView.as_view()),
+    path("2fa/verify/", TwoFactorVerifyView.as_view()),
+    path("password-reset/request/", PasswordResetRequestView.as_view()),
+    path("password-reset/confirm/<int:uid>/<str:token>/", PasswordResetConfirmView.as_view(), name="password-reset-confirm"),
+    path("change-password/", ChangePasswordView.as_view()),
 ]
