@@ -1,7 +1,13 @@
 from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from .views import (RegisterView, LoginView , VerifyEmailView ,TwoFactorSetupView, TwoFactorVerifyView,
     PasswordResetRequestView, PasswordResetConfirmView , PasswordResetRequestView,
-    ChangePasswordView , UserProfileView)
+    ChangePasswordView , UserProfileView , LogoutView, NotificationView)
+
+
+router = DefaultRouter()
+router.register(r'notifications', NotificationView, basename='notification')
+
 
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
@@ -15,4 +21,6 @@ urlpatterns = [
     path("password-reset/confirm/<int:uid>/<str:token>/", PasswordResetConfirmView.as_view(), name="password-reset-confirm"),
     path("change-password/", ChangePasswordView.as_view()),
     path('profile/', UserProfileView.as_view(), name='user-profile'),
+    path('logout/', LogoutView.as_view(), name='logout'),
+    path('', include(router.urls)),
 ]

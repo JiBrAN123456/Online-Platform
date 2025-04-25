@@ -4,6 +4,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .utils import generate_verification_token
 from django.core.mail import send_mail
 from django.conf import settings
+from .models import Notification
+
 
 User = get_user_model()
 
@@ -106,5 +108,10 @@ class JWTTokenSerializer(serializers.Serializer):
             "refresh_token" : str(refresh),
         }  
     
+class NotificationSerializer(serializers.Serializer):
+ 
+    class Meta:
+        model = Notification
+        fields = [ "id" , "user" ,"title","message","is_read","created_at"]
 
 
