@@ -1,8 +1,8 @@
 from django.shortcuts import render
-from rest_framework import status, generics
+from rest_framework import status, generics , permissions
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .serializers import RegisterSerializer, LoginSerializer, JWTTokenSerializer
+from .serializers import RegisterSerializer, LoginSerializer, JWTTokenSerializer , UserProfileSerializer
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from .utils import verify_token
@@ -145,3 +145,14 @@ class ChangePasswordView(APIView):
          user.set_password(new)
          user.save()
          return Response({"message": "Password changed successfully"})
+     
+
+class UserProfileView(generics.RetrieveUpdateAPIView):
+     serializer_class = UserProfileSerializer
+     permission_classes = [permissions.IsAuthenticated]
+
+
+     def get_object(self):
+          return self.request.user
+
+
