@@ -1,12 +1,12 @@
 from django.shortcuts import render
-from rest_framework import status, generics , permissions
+from rest_framework import status, generics , permissions , viewsets
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .serializers import RegisterSerializer, LoginSerializer, JWTTokenSerializer , UserProfileSerializer
+from .serializers import RegisterSerializer, LoginSerializer, JWTTokenSerializer , UserProfileSerializer, NotificationSerializer
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from .utils import verify_token
-from .models import User
+from .models import User , LoginHistory , UserActivityLog , Notification
 import pyotp
 import qrcode
 import io
@@ -15,8 +15,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.urls import reverse
-
-
+from .utils import log_user_activity
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
@@ -32,6 +32,17 @@ class LoginView(generics.GenericAPIView):
           if serializer.is_valid():
                user = serializer.validated_data
                refresh = RefreshToken.for_user(user)
+
+               LoginHistory.objects.create(
+                    user=user,
+                    ip_address = request.META.get("REMOTE_ADDR"),
+                    user_agent = request.META.get("HTTP_USER_AGENT", "")
+               )
+               
+               log_user_activity(user , request , "login")
+
+
+
                return Response({
                     "access_token": str(refresh.access_token),
                     "refresh_token": str(refresh)
@@ -156,3 +167,35 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
           return self.request.user
 
 
+class LogoutView(APIView):
+     permission_classes = [IsAuthenticated]
+
+     def post(self, request):
+          try:
+             refresh_token = request.data.get("refresh_token")
+             token = RefreshToken(refresh_token)
+             token.blacklist()
+
+             log_user_activity(request.user, request, "logout")
+
+             return Response({"detail": "Sucessfully logged out"}, status=status.HTTP_205_RESET_CONTENT)
+          except TokenError as e:
+             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)   
+          
+
+class NotificationView(viewsets.ModelViewSet):          
+
+     serializer_class = NotificationSerializer
+     permission_classes = [IsAuthenticated]
+
+     def get_queryset(self):
+          return Notification.objects.filter(user=self.request.user)     
+     
+
+     def perform_create(self,serializer):
+         serializer.save(use=self.request.user)
+
+     def mark_as_read(self, request):
+         notifications = self.get_queryset().filter(is_read=False) 
+         notifications.update(is_read= True)
+         return Response({"status":"marked as read"}, status=status.HTTP_202_ACCEPTED)    
