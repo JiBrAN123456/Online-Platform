@@ -172,3 +172,10 @@ LOGIN_REDIRECT_URL = '/'
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = "no-reply@yourplatform.com"
+
+
+INSTALLED_APPS += ["rest_framework_simplejwt.token_blacklist"]
+
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
