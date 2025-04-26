@@ -1,8 +1,8 @@
 from django.shortcuts import render
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions , viewsets
 from .models import Course, Lesson, Enrollment
 from .serializers import CourseSerializer, LessonSerializer, EnrollmentSerializer
-
+from .permissions import IsInstructorOrReadOnly
 
 
 class CourseListCreateView(generics.ListCreateAPIView):
@@ -15,7 +15,7 @@ class CourseListCreateView(generics.ListCreateAPIView):
       def get_permissions(self):
             
             if self.request.method == "POST":
-                return [permissions.IsAuthenticated(), permissions.IsAdminUser() ] 
+                return [permissions.IsAuthenticated(), permissions.IsAdminUser()] 
             return [permissions.AllowAny()]
             
 
@@ -34,3 +34,10 @@ class EnrollCourseView(generics.CreateAPIView):
 
       def perform_create(self, serializer):
             serializer.save(student = self.request.user)
+
+
+
+class CourseViewSet(viewsets.ModelViewSet):
+      queryset = Course.objects.all()
+      serializer_class = CourseSerializer
+      permission_classes = [IsInstructorOrReadOnly]            
