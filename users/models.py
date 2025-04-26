@@ -62,7 +62,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
     def __str__(self):
-        return f"{self.username} ({self.role})"
+        return f"{self.email} ({self.role})"
     
     
 class UserActivityLog(models.Model):
@@ -78,7 +78,7 @@ class UserActivityLog(models.Model):
 
 
 class LoginHistory(models.Model):
-    user = models.ForeignKey(UserActivityLog, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
     ip_address = models.GenericIPAddressField(null= True , blank= True)
     user_agent = models.TextField(null = True , blank=True)    

@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "payments",
     'rest_framework.authtoken',  # Optional if you're using token-based auth too
     'social_django',
+    "channels",
 ]
 
 MIDDLEWARE = [
@@ -179,3 +180,13 @@ INSTALLED_APPS += ["rest_framework_simplejwt.token_blacklist"]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+
+ASGI_APPLICATION = "course_platform.asgi.application" 
+
+# Use in-memory for dev, or Redis in production
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
