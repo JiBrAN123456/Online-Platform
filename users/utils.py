@@ -1,7 +1,8 @@
 from django.core.signing import TimestampSigner, BadSignature, SignatureExpired
 from django.conf import settings
 from .models import UserActivityLog
-
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 
 signer = TimestampSigner()
@@ -29,3 +30,22 @@ def log_user_activity(user, request, activity_type):
         ip_address=ip,
         user_agent=user_agent
     )
+
+
+
+
+
+
+
+def send_realtime_notification(user_id, title, message):
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f"user_{user_id}",
+        {
+            "type": "send_notification",
+            "content": {
+                "title": title,
+                "message": message,
+            }
+        }
+    )    
