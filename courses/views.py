@@ -3,6 +3,9 @@ from rest_framework import generics, permissions , viewsets
 from .models import Course, Lesson, Enrollment
 from .serializers import CourseSerializer, LessonSerializer, EnrollmentSerializer
 from .permissions import IsInstructorOrReadOnly
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status
 
 
 class CourseListCreateView(generics.ListCreateAPIView):
@@ -36,8 +39,53 @@ class EnrollCourseView(generics.CreateAPIView):
             serializer.save(student = self.request.user)
 
 
+class MyEnrollmentsView(generics.ListAPIView):
+    serializer_class = EnrollmentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+          return Enrollment.objects.filter(student= self.request.user)
+
+
+
+class EnrollmentViewSet(viewsets.ModelViewSet):
+
+     serializer_class = EnrollmentSerializer
+     permission_classes = [permissions.IsAuthenticated]
+
+
+     def get_queryset(self):
+           return Enrollment.objects.filter(user= self.request.user)
+     
+     def perform_create(self, serializer):
+           serializer.save(user= self.request.user)
+
+
+     @action(detail=True, methods=['delete'], url_path='unenroll')
+     def unenroll(self, request, pk=None):
+           enrollment = self.get_object()
+           enrollment.delete()
+           return Response({"detail" : "Sucessfully unenrolled from the course"}, status=status.HTTP_200_OK)
+
+
+     def check_enrollment(self, request):
+            course_id = Course.objects.get(id= course_id)
+            if not course_id:
+                 return Response({"Response": "Course id is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+            try:
+                  course = Course.objects.get(id = course_id)
+            except:
+                  return Response({"detail": "Course not found"}, status=status.HTTP_400_BAD_REQUEST) 
+
+            is_enrolled = Enrollment.objects.get(user= self.request.user , course=course)
+
+
+            return Response({"is_enrolled": is_enrolled} , status=status.HTTP_200_OK)        
+
 
 class CourseViewSet(viewsets.ModelViewSet):
       queryset = Course.objects.all()
       serializer_class = CourseSerializer
       permission_classes = [IsInstructorOrReadOnly]            
+
