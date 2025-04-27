@@ -1,11 +1,14 @@
 from django.shortcuts import render
 from rest_framework import generics, permissions , viewsets
-from .models import Course, Lesson, Enrollment
+from .models import Course, Lesson, Enrollment , LessonProgress
 from .serializers import CourseSerializer, LessonSerializer, EnrollmentSerializer
 from .permissions import IsInstructorOrReadOnly
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from django.utils import timezone
 
 
 class CourseListCreateView(generics.ListCreateAPIView):
@@ -88,4 +91,37 @@ class CourseViewSet(viewsets.ModelViewSet):
       queryset = Course.objects.all()
       serializer_class = CourseSerializer
       permission_classes = [IsInstructorOrReadOnly]            
+
+
+
+class MarkLessonCompletedView(APIView):
+      permission_classes = [IsAuthenticated]
+
+
+      def post(self, request, enrollment_id, lesson_id):
+          enrollment = Enrollment.objects.get(id = enrollment_id , user= request.user) 
+          lesson = Lesson.objects.get(id = lesson_id) 
+
+
+          progress , created = LessonProgress.objects.get_or_create(enrollment = enrollment , lesson = lesson)
+          
+          if not progress.completed:
+                progress.completed = True
+                progress.completed_at = timezone.now()
+                progress.save()
+
+                total_lessons = Lesson.objects.filter(course = enrollment.course).count()
+                completed_lessons = LessonProgress.objects.filter(enrollment = enrollment, completed = True).count()
+
+                if total_lessons > 0:
+                      enrollment.progress = ( completed_lessons/total_lessons) * 100
+                      enrollment.save()
+
+                if enrollment.progress == 100:
+                      enrollment.status == "completed"
+                      enrollment.save()
+
+                return Response({"message": "Lesson marked as completed", "progress": enrollment.progress})
+
+          return Response({"message": "Lesson already completed"})
 
