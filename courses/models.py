@@ -30,12 +30,33 @@ class Lesson(models.Model):
 
 
 class Enrollment(models.Model):    
+    STATUS_CHOICES = [
+        ("Active","active"),
+        ("completed","Completed"),
+        ("cancelled","Cancelled"),
+    ]
+    
     student = models.ForeignKey(User,on_delete=models.CASCADE ,  limit_choices_to={'role': 'student'})
-    course = models.ForeignKey(Lesson , on_delete=models.CASCADE )
+    course = models.ForeignKey(Course , on_delete=models.CASCADE )
     enrolled_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20 , choices=STATUS_CHOICES , default = "choices")
+    progress = models.DecimalField(max_digits=5, decimal_places=2 , default=0.0)
+
 
     class Meta:
         unique_together = ("student" , "course")
 
     def __str__(self):
         return f"{self.student.email} enroleld in {self.course.title}"    
+
+
+
+class LessonProgress(models.Model):
+    enrollment = models.ForeignKey(Enrollment , on_delete=models.CASCADE,  related_name="lesson_progress") 
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    completed = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+
+    class Meta:
+        unique_together = ('enrollment', 'lesson')
