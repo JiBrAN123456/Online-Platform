@@ -37,3 +37,13 @@ class EnrollmentSerializer(serializers.ModelSerializer):
         model = Enrollment
         fields = ['id', 'student', 'course', 'enrolled_at']
         
+
+
+
+class EnrollmentDashboardSerializer(serializers.Serializer):
+    course_title = serializers.CharField(source= "course.title")
+    course_image = serializers. ImageField(source= "course.image")
+
+    class Meta:
+        model = Enrollment
+        fields = ['id', 'course_title', 'course_image', 'progress', 'status']

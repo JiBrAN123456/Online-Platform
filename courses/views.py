@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import generics, permissions , viewsets
 from .models import Course, Lesson, Enrollment , LessonProgress
-from .serializers import CourseSerializer, LessonSerializer, EnrollmentSerializer
+from .serializers import CourseSerializer, LessonSerializer, EnrollmentSerializer , EnrollmentDashboardSerializer
 from .permissions import IsInstructorOrReadOnly
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -9,6 +9,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
+from users.models import Notification
 
 
 class CourseListCreateView(generics.ListCreateAPIView):
@@ -125,3 +126,14 @@ class MarkLessonCompletedView(APIView):
 
           return Response({"message": "Lesson already completed"})
 
+
+
+
+class StudentDashboardView(generics.ListAPIView):
+      serializer_class =  EnrollmentDashboardSerializer
+      permission_classes = [IsAuthenticated]
+
+
+      def get_queryset(self):
+            return Enrollment.objects.filter(user= self.request.user)
+      
