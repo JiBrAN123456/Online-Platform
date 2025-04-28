@@ -5,17 +5,17 @@ from .serializers import CourseSerializer, LessonSerializer, EnrollmentSerialize
 from .permissions import IsInstructorOrReadOnly
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status , filters
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 from users.models import Notification
-
+from rest_framework.pagination import PageNumberPagination
+from django_filters.rest_framework import DjangoFilterBackend
 
 class CourseListCreateView(generics.ListCreateAPIView):
-      queryset = Course.objects.all()
-      serializer_class = CourseSerializer
-      
+
+
       def perform_create(self, serializer):
             serializer.save(instructor=self.request.user)
 
@@ -25,6 +25,30 @@ class CourseListCreateView(generics.ListCreateAPIView):
                 return [permissions.IsAuthenticated(), permissions.IsAdminUser()] 
             return [permissions.AllowAny()]
             
+
+class CoursePagination(PageNumberPagination):
+      page_size = 20
+      page_size_query_param = "page_size"
+      max_page_size = 50
+
+
+class CourseListAPIView(generics.ListAPIView):
+      queryset = Course.objects.all()
+      serializer_class = CourseSerializer
+      pagination_class =  CoursePagination
+ 
+
+      filter_backends = [DjangoFilterBackend , filters.SearchFilter ,filters.OrderingFilter]
+      search_filters = ['title', 'description', 'instructor__first_name', 'instructor__last_name']
+      filterset_fields = {
+            'price' : ["gte", "lte"],
+      }
+      
+      ordering_fields = ['created_at',"price"]
+      ordering = ["-created_at"]
+
+
+
 
 class CourseDetailView(generics.RetrieveAPIView):
       queryset = Course.objects.all()
@@ -136,4 +160,13 @@ class StudentDashboardView(generics.ListAPIView):
 
       def get_queryset(self):
             return Enrollment.objects.filter(user= self.request.user)
-      
+
+
+
+
+class FeaturedCoursesAPIView(generics.ListAPIView):
+      serializer_class = CourseSerializer
+
+
+      def get_queryset(self):
+            return Course.objects.order_by("created_at")[:5]

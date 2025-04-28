@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     CourseListCreateView, CourseDetailView, 
     EnrollCourseView, MyEnrollmentsView, EnrollmentViewSet, 
-    MarkLessonCompletedView , StudentDashboardView
+    MarkLessonCompletedView , StudentDashboardView , CourseListAPIView, FeaturedCoursesAPIView
 )
 
 router = DefaultRouter()
@@ -20,7 +20,8 @@ urlpatterns = [
     path('check-enrollment/', MyEnrollmentsView.as_view(), name='check-enrollment'),
     path('enrollments/<int:enrollment_id>/lessons/<int:lesson_id>/complete/', MarkLessonCompletedView.as_view(), name='mark-lesson-complete'),
     path('dashboard/', StudentDashboardView.as_view(), name="student-dashboard"),
-
+    path('courses/', CourseListAPIView.as_view(), name='course-list'),
+    path('courses/featured/', FeaturedCoursesAPIView.as_view(), name='featured-courses'),
     # DRF router urls
     path('', include(router.urls)),
 ]
