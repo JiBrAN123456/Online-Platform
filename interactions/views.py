@@ -2,6 +2,8 @@ from rest_framework import generics, permissions
 from .models import CourseReview, LessonComment, LessonLike
 from .serializers import CourseReviewSerializer, LessonCommentSerializer, LessonLikeSerializer
 from rest_framework.permissions import BasePermission, SAFE_METHODS
+from rest_framework.throttling import AnonRateThrottle
+from .throttle import CommentRateThrottle
 
 class IsOwnerOrReadOnly(BasePermission):
     def has_permission(self, request, view,obj):
@@ -25,6 +27,7 @@ class CourseReviewListCreateView(generics.RetrieveUpdateDestroyAPIView):
 class LessonCommentListCreateView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = LessonCommentSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+    throttle_classes = [CommentRateThrottle]
 
     def get_queryset(self):
         lesson_id = self.kwargs.get("lesson_id")
