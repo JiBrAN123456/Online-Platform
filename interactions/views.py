@@ -1,12 +1,16 @@
 from rest_framework import generics, permissions
 from .models import CourseReview, LessonComment, LessonLike
 from .serializers import CourseReviewSerializer, LessonCommentSerializer, LessonLikeSerializer
+from rest_framework.permissions import BasePermission, SAFE_METHODS
+
+class IsOwnerOrReadOnly(BasePermission):
+    def has_permission(self, request, view,obj):
+        return request.method in SAFE_METHODS or obj.user == request.user
 
 
-
-class CourseReviewListCreateView(generics.ListCreateAPIView):
+class CourseReviewListCreateView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CourseReviewSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated,IsOwnerOrReadOnly]
 
     def get_queryset(self):
         course_id = self.kwargs.get('course_id')
@@ -18,9 +22,9 @@ class CourseReviewListCreateView(generics.ListCreateAPIView):
 
 
 
-class LessonCommentListCreateView(generics.ListCreateAPIView):
+class LessonCommentListCreateView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = LessonCommentSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
 
     def get_queryset(self):
         lesson_id = self.kwargs.get("lesson_id")

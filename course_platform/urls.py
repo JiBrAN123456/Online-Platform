@@ -25,4 +25,5 @@ urlpatterns = [
     path('api/', include('users.urls')),  # Include user-related URLs
     path('api-auth/', include('rest_framework.urls')), 
     path('courses/', include('courses.urls')),
+    path('interactions/', include('interactions.urls')),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
