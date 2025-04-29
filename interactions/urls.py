@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (
     CourseReviewListCreateView,
     LessonCommentListCreateView,
-    LessonLikeCreateView,
+    LessonLikeCreateView,ToggleLikeView
 )
 
 urlpatterns = [
@@ -14,4 +14,6 @@ urlpatterns = [
 
     # Lesson Likes
     path('lessons/<int:lesson_id>/like/', LessonLikeCreateView.as_view(), name='lesson-like'),
+    path("like/", ToggleLikeView.as_view(), name="toggle-like"),
+
 ]

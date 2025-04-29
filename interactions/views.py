@@ -1,9 +1,12 @@
-from rest_framework import generics, permissions
-from .models import CourseReview, LessonComment, LessonLike
-from .serializers import CourseReviewSerializer, LessonCommentSerializer, LessonLikeSerializer
+from rest_framework import generics, permissions, status
+from .models import CourseReview, LessonComment, LessonLike , Like
+from .serializers import CourseReviewSerializer, LessonCommentSerializer, LessonLikeSerializer ,LessonSerializer
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 from rest_framework.throttling import AnonRateThrottle
 from .throttle import CommentRateThrottle
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.contrib.contenttypes.models import ContentType
 
 class IsOwnerOrReadOnly(BasePermission):
     def has_permission(self, request, view,obj):
@@ -45,3 +48,15 @@ class LessonLikeCreateView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user, lesson_id=self.kwargs.get('lesson_id'))
+
+
+
+class ToggleLikeView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+
+    def post(self, request):
+        model_type = request.data.get("type")
+        obj_id = request.data.get("id")
+
+        
