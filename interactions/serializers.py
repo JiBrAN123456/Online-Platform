@@ -24,7 +24,7 @@ class CourseReviewSerializer(serializers.ModelSerializer):
 
 
 
-class LEssonCpmmentSerializer(serializers.ModelSerializer):
+class LessonCommentSerializer(serializers.ModelSerializer):
      user_name = serializers.SerializerMethodField()  
 
      class Meta:
