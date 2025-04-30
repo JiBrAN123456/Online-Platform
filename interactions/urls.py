@@ -4,7 +4,7 @@ from .views import (
     LessonCommentListCreateView,
     LessonLikeCreateView,
     ToggleLikeView, 
-    LessonCommentRetrieveUpdateDestroyView
+    LessonCommentRetrieveUpdateDestroyView ,BookmarkDeleteView , BookmarkListCreateView
 )
 
 urlpatterns = [
@@ -21,5 +21,7 @@ urlpatterns = [
     path('lessons/<int:lesson_id>/like/', LessonLikeCreateView.as_view(), name='lesson-like'),
     path("like/", ToggleLikeView.as_view(), name="toggle-like"),
     
-
+    # Bookmark 
+    path('bookmarks/', BookmarkListCreateView.as_view(), name='bookmark-list-create'),
+    path('bookmarks/<int:pk>/', BookmarkDeleteView.as_view(), name='bookmark-delete'),
 ]
