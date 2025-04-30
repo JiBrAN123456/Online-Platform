@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CourseReview, LessonComment, LessonLike, Like, Lesson
+from .models import CourseReview, LessonComment, LessonLike, Like, Lesson , Bookmark , Course
 from django.contrib.contenttypes.models import ContentType
 
 
@@ -64,10 +64,11 @@ class LessonLikeSerializer(serializers.ModelSerializer):
 class LessonSerializer(serializers.ModelSerializer):
     total_likes = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
+    is_bookmarked = serializers.SerializerMethodField()
 
     class Meta:
         model = Lesson
-        fields = ['id', 'title', 'description', 'video_url', 'created_at', 'total_likes', 'is_liked']  # Add actual fields from your model
+        fields = ['id', 'title', 'description', 'video_url', 'created_at', 'total_likes', 'is_liked' , "is_bookmarked"]  # Add actual fields from your model
 
     def get_total_likes(self, obj):
         content_type = ContentType.objects.get_for_model(Lesson)
@@ -82,3 +83,48 @@ class LessonSerializer(serializers.ModelSerializer):
                 object_id=obj.id
             ).exists()
         return False
+
+    
+    def get_is_bookmarked(self, obj):
+        user = self.context["request"].user
+        if user.is_authenticated:
+            return Bookmark.objects.filter(
+                user=user,
+                content_type = ContentType.objects.get_for_model(Lesson),
+                object_id = obj.id
+            ).exists()
+        return False
+
+
+
+class BookmarkSerializer(serializers.ModelSerializer):
+    class Meta:
+       model = Bookmark
+       fields = ['id', 'user', 'content_type', 'object_id', 'created_at']
+       read_only_fields = ['id', 'user', 'created_at']
+
+
+class CourseSerializer(serializers.ModelSerializer):
+    instructor_name = serializers.SerializerMethodField()
+    lessons = LessonSerializer(many=True, read_only=True)
+    is_bookmarked = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Course
+        fields = ['id', 'title', 'description', 'price', 'image', 'created_at', 'instructor_name', 'lessons', 'is_bookmarked']
+
+
+        def get_instructor_name(self,obj):
+            return f"{obj.instructor.first_name} {obj.instructor.last_name}"
+        
+        def get_is_bookmarked(self,obj):
+            user = self.context["request"].user
+            if user.is_authenticated:
+                return Bookmark.objects.filter(
+                    user=user,
+                    content_type= ContentType.objects.get_for_model(Course),
+                    object = obj.id
+
+                ).exists()
+            return False
+            

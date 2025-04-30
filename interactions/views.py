@@ -1,6 +1,6 @@
 from rest_framework import generics, permissions, status
-from .models import CourseReview, LessonComment, LessonLike , Like ,Lesson 
-from .serializers import CourseReviewSerializer, LessonCommentSerializer, LessonLikeSerializer ,LessonSerializer
+from .models import CourseReview, LessonComment, LessonLike , Like ,Lesson , Bookmark
+from .serializers import CourseReviewSerializer, LessonCommentSerializer, LessonLikeSerializer ,LessonSerializer , BookmarkSerializer
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 from rest_framework.throttling import AnonRateThrottle
 from .throttle import CommentRateThrottle
@@ -101,3 +101,26 @@ class LessonCommentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIVi
             raise PermissionDenied("You can only delete you own commetns")
         instance.delete()
              
+
+
+class BookmarkListCreateView(generics.ListCreateAPIView):
+    
+    serializer_class = BookmarkSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Bookmark.objects.filter(user=self.request.user)
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class BookmarkDeleteView(generics.DestroyAPIView):
+    
+    queryset = Bookmark.object.all()
+    serializer_class = BookmarkSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+    def get_queryset(self):
+        return Bookmark.objects.filter(user= self.request.user) 
