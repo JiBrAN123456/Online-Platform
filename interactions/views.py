@@ -1,5 +1,5 @@
 from rest_framework import generics, permissions, status
-from .models import CourseReview, LessonComment, LessonLike , Like
+from .models import CourseReview, LessonComment, LessonLike , Like ,Lesson 
 from .serializers import CourseReviewSerializer, LessonCommentSerializer, LessonLikeSerializer ,LessonSerializer
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 from rest_framework.throttling import AnonRateThrottle
@@ -7,6 +7,7 @@ from .throttle import CommentRateThrottle
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.contenttypes.models import ContentType
+from rest_framework.exceptions import PermissionDenied
 
 class IsOwnerOrReadOnly(BasePermission):
     def has_permission(self, request, view,obj):
@@ -59,4 +60,44 @@ class ToggleLikeView(APIView):
         model_type = request.data.get("type")
         obj_id = request.data.get("id")
 
+        model_map = {
+            "lesson" :Lesson,
+            "comment": LessonComment,
+        }
+
+        if model_type not in model_map:
+            return Response({"error":"Invalid type"}, status=400)
         
+        model_class = model_map[model_type]
+        content_type = ContentType.objects.get_for_model(model_class)
+
+        like, created = Like.objects.get_or_create(
+            user=request.user,
+            content_type=content_type,
+            object_id= obj_id
+        )
+
+        if not created:
+            like.delete()
+            return Response({"message":"Unliked"}, status=200)
+        
+        return Response({"message":"Liked"},status=201)
+    
+
+
+class LessonCommentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = LessonComment.objects.all()
+    serializer_class = LessonCommentSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+
+    def perform_update(self, serializer):
+        if self.get_object().user != self.request.user:
+            raise PermissionDenied("You can only update your own comments")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if instance.user != self.request.user:
+            raise PermissionDenied("You can only delete you own commetns")
+        instance.delete()
+             
