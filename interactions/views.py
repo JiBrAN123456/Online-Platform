@@ -28,7 +28,7 @@ class CourseReviewListCreateView(generics.RetrieveUpdateDestroyAPIView):
 
 
 
-class LessonCommentListCreateView(generics.RetrieveUpdateDestroyAPIView):
+class LessonCommentListCreateView(generics.ListCreateAPIView):
     serializer_class = LessonCommentSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
     throttle_classes = [CommentRateThrottle]
@@ -117,7 +117,7 @@ class BookmarkListCreateView(generics.ListCreateAPIView):
 
 class BookmarkDeleteView(generics.DestroyAPIView):
     
-    queryset = Bookmark.object.all()
+  
     serializer_class = BookmarkSerializer
     permission_classes = [permissions.IsAuthenticated]
 
