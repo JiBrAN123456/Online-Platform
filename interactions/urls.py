@@ -2,7 +2,9 @@ from django.urls import path
 from .views import (
     CourseReviewListCreateView,
     LessonCommentListCreateView,
-    LessonLikeCreateView,ToggleLikeView
+    LessonLikeCreateView,
+    ToggleLikeView, 
+    LessonCommentRetrieveUpdateDestroyView
 )
 
 urlpatterns = [
@@ -11,9 +13,13 @@ urlpatterns = [
 
     # Lesson Comments
     path('lessons/<int:lesson_id>/comments/', LessonCommentListCreateView.as_view(), name='lesson-comments'),
+    path('lesson-comments/', LessonCommentListCreateView.as_view(), name='lesson-comment-list-create'),
+    path('lesson-comments/<int:pk>/', LessonCommentRetrieveUpdateDestroyView.as_view(), name='lesson-comment-detail'),
+
 
     # Lesson Likes
     path('lessons/<int:lesson_id>/like/', LessonLikeCreateView.as_view(), name='lesson-like'),
     path("like/", ToggleLikeView.as_view(), name="toggle-like"),
+    
 
 ]
