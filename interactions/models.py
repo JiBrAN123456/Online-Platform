@@ -30,6 +30,10 @@ class LessonComment(models.Model):
       user = models.ForeignKey(CourseReview.user, on_delete=models.CASCADE , related_name= "lesson_comments")
       comment = models.TextField()
       created_at = models.DateTimeField(auto_now_add=True)
+      
+      updated_at = models.DateTimeField(auto_now=True)
+      is_edited = models.BooleanField(default=False)
+      parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name="replies")
 
       class Meta:
             ordering = ["-created_at"]
@@ -37,6 +41,12 @@ class LessonComment(models.Model):
       
       def __str__(self):
             return f"{self.user.email} - {self.lesson.title}"
+      
+    
+      def save(self, *args, **kwargs):
+         if self.pk:  # If the comment already exists and is being updated
+             self.is_edited = True
+         super().save(*args, **kwargs)
 
 
 class LessonLike(models.Model):        
@@ -65,4 +75,5 @@ class Like(models.Model):
 
       class Meta:
             unique_togetehr = ('user','content_type','object_id')
+
             
