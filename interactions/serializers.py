@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CourseReview, LessonComment, LessonLike, Like, Lesson , Bookmark , Course
+from .models import CourseReview, LessonComment, LessonLike, Like, Lesson , Bookmark , Course , Notification
 from django.contrib.contenttypes.models import ContentType
 
 
@@ -127,4 +127,11 @@ class CourseSerializer(serializers.ModelSerializer):
 
                 ).exists()
             return False
-            
+        
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+
+      class Meta:
+          model = Notification
+          fields =  ['id', 'recipient', 'actor', 'verb', 'target', 'is_read', 'timestamp']     

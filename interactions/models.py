@@ -91,3 +91,16 @@ class Bookmark(models.Model):
 
       def __str__(self):
             return f"{self.user.email} bookmarked {self.content_object}"
+
+
+
+class Notification(models.Model):
+      recipient = models.ForeignKey(User, on_delete=models.CASCADE , related_name="recipient")
+      actor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="actor")
+      verb = models.CharField(max_length=255)
+      target = models.CharField(max_length=255, null=True, blank=True)
+      is_read = models.BooleanField(default=False)
+      timestamp = models.DateTimeField(auto_now_add=True)
+
+      class Meta:
+            ordering = ["-timestamp"]
