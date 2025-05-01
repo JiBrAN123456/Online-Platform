@@ -7,6 +7,8 @@ from .views import (
     ToggleLikeView,
     BookmarkListCreateView,
     BookmarkDeleteView,
+    NotificationListView,
+    MarkNotificationAsRead,
 )
 
 urlpatterns = [
@@ -24,4 +26,8 @@ urlpatterns = [
     # ─── Bookmarks ──────────────────────────────────
     path('bookmarks/', BookmarkListCreateView.as_view(), name='bookmark-list-create'),
     path('bookmarks/<int:pk>/', BookmarkDeleteView.as_view(), name='bookmark-delete'),
+
+
+    path('notifications/', NotificationListView.as_view(), name='notification-list'),
+    path('notifications/<int:pk>/read/', MarkNotificationAsRead.as_view(), name='notification-mark-read'),
 ]

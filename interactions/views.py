@@ -1,6 +1,6 @@
 from rest_framework import generics, permissions, status
-from .models import CourseReview, LessonComment, LessonLike , Like ,Lesson , Bookmark
-from .serializers import CourseReviewSerializer, LessonCommentSerializer, LessonLikeSerializer ,LessonSerializer , BookmarkSerializer
+from .models import CourseReview, LessonComment, LessonLike , Like ,Lesson , Bookmark , Notification
+from .serializers import CourseReviewSerializer, LessonCommentSerializer, LessonLikeSerializer ,LessonSerializer , BookmarkSerializer , NotificationSerializer
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 from rest_framework.throttling import AnonRateThrottle
 from .throttle import CommentRateThrottle
@@ -124,3 +124,27 @@ class BookmarkDeleteView(generics.DestroyAPIView):
 
     def get_queryset(self):
         return Bookmark.objects.filter(user= self.request.user) 
+    
+
+
+
+class NotificationListView(generics.ListAPIView):
+    serializer_class = NotificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Notification.objects.filter(recipient=self.request.user)
+    
+
+class MarkNotificationAsRead(generics.UpdateAPIView):
+    serializer_class = NotificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Notification.objects.all()
+
+    def patch(self, request, *args, **kwargs):
+        notification = self.get_object()
+        if notification.recipient != request.user:
+           return Response({'error': 'Permission denied'}, status=403)
+        notification.is_read = True
+        notification.save() 
+        return Response({"status" :"marked as read"})    
