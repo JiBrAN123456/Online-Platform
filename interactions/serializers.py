@@ -131,7 +131,20 @@ class CourseSerializer(serializers.ModelSerializer):
 
 
 class NotificationSerializer(serializers.ModelSerializer):
+      
+      actor_name = serializers.SerializerMethodField()
+      target_type = serializers.SerializerMethodField()
 
       class Meta:
           model = Notification
-          fields =  ['id', 'recipient', 'actor', 'verb', 'target', 'is_read', 'timestamp']     
+          fields =  ['id', 'recipient', 'actor', 'actor_name', 'verb',
+            'target_type', 'object_id', 'description', 'url',
+            'is_read', 'timestamp']
+
+          read_only_fields = fields     
+
+          def get_actor_name(self, obj):
+             return f"{obj.actor.first_name} {obj.actor.last_name}"
+
+          def get_target_type(self, obj):
+             return obj.content_type.model if obj.content_type else None
