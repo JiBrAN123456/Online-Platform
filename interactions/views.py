@@ -39,8 +39,17 @@ class LessonCommentListCreateView(generics.ListCreateAPIView):
     
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user, lesson_id=self.kwargs.get("lesson_id"))
+        comment = serializer.save(user=self.request.user, lesson_id=self.kwargs.get("lesson_id"))
 
+    # Send notification if it's a reply
+        if comment.parent:
+           if comment.parent.user != self.request.user:
+                Notification.objects.create(
+                recipient=comment.parent.user,
+                actor=self.request.user,
+                verb="replied to your comment",
+                target=comment.parent
+            )
 
 
 class LessonLikeCreateView(generics.CreateAPIView):
@@ -147,4 +156,15 @@ class MarkNotificationAsRead(generics.UpdateAPIView):
            return Response({'error': 'Permission denied'}, status=403)
         notification.is_read = True
         notification.save() 
-        return Response({"status" :"marked as read"})    
+        return Response({"status" : "marked as read"})    
+
+
+
+
+class MarkAllNotificationsAsRead(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+
+    def post(self,request):
+        Notification.objects.filter(recipient=request.user , is_read= False).update(is_read=True)
+        return Response({"status":"marked as read"}, status=status.HTTP_200_OK)
