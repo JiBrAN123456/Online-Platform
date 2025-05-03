@@ -24,8 +24,17 @@ class CourseReviewListCreateView(generics.RetrieveUpdateDestroyAPIView):
     
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user, course_id=self.kwargs.get("course_id"))
+        review = serializer.save(user=self.request.user, course_id=self.kwargs.get("course_id"))
 
+    # Notify course instructor
+        instructor = review.course.instructor
+        if instructor != self.request.user:
+            Notification.objects.create(
+            recipient=instructor,
+            actor=self.request.user,
+            verb="left a review on your course",
+            target=review.course
+        )
 
 
 class LessonCommentListCreateView(generics.ListCreateAPIView):
@@ -121,7 +130,18 @@ class BookmarkListCreateView(generics.ListCreateAPIView):
         return Bookmark.objects.filter(user=self.request.user)
     
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        bookmark = serializer.save(user=self.request.user)
+
+        content_object = bookmark.content_object
+        if hasattr(content_object, 'instructor'):
+           instructor = content_object.instructor
+           if instructor != self.request.user:
+            Notification.objects.create(
+                recipient=instructor,
+                actor=self.request.user,
+                verb="bookmarked your content",
+                target=content_object
+            )
 
 
 class BookmarkDeleteView(generics.DestroyAPIView):
