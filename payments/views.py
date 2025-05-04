@@ -11,6 +11,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from .models import Payment
 from courses.models import Course
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse, JsonResponse
+from django.utils.decorators import method_decorator
+from django.views import View
 
 
 
@@ -29,6 +34,7 @@ class CreatePaymentView(generics.CreateAPIView):
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
+endpoint_secret = settings.STRIPE_WEBHOOK_SECRET 
 
 
 class CreatePaymentIntentView(APIView):
@@ -64,3 +70,33 @@ class CreatePaymentIntentView(APIView):
 
         return Response({"client_secret": intent["client_secret"]})
     
+
+
+
+class StripeWebhookView(View):
+    def post(self, request, *args, **kwargs):
+        paylaod = request.body
+        sig_header = request.META.get("HTTP_STRIDE_SIGNATURE")
+
+
+        try:
+            event = stripe.Webhook.construct_event(
+                paylaod, sig_header, endpoint_secret
+            )
+        except stripe.error.SignatureVerificationError:
+            return HttpResponse(status= 400)
+
+        if event['type'] == 'payment_intent.succeeded':
+            intent = event['data']['object']
+            payment_intent_id = intent['id']
+
+            try:
+                payment = Payment.objects.get(stripe_payment_intent_id=payment_intent_id)
+                payment.status = 'succeeded'
+                payment.save()
+
+                # Grant access (e.g., enroll user in course) – we can do that next
+            except Payment.DoesNotExist:
+                return JsonResponse({'error': 'Payment not found'}, status=404)
+
+        return HttpResponse(status=200)    
