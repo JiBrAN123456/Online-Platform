@@ -1,6 +1,6 @@
 from rest_framework import generics, permissions
 from .models import Payment
-from .serializers import PaymentSerializer
+from .serializers import PaymentSerializer , TransactionSerializer
 from rest_framework.response import Response
 from rest_framework import status
 import stripe
@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from .models import Payment
+from .models import Payment ,Transaction
 from courses.models import Course
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
@@ -17,6 +17,7 @@ from django.http import HttpResponse, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from courses.models import Enrollment
+from rest_framework import viewsets, permissions
 
 
 
@@ -115,3 +116,20 @@ class StripeWebhookView(View):
                 return JsonResponse({"error":"Payment not found"}, status= 404)    
 
         return HttpResponse(status=200)    
+    
+
+
+class TransactionViewset(viewsets.ModelViewSet):
+    queryset = Transaction.objects.all()     
+    serializer_class = TransactionSerializer
+    permission_classes = [IsAuthenticated]
+
+
+    def get_queryset(self):
+        return self.queryset.filter(user = self.request.user)
+    
+
+    def perform_create(self, serializer):
+        serializer.save(user= self.request.user, status= "completed")
+
+        
