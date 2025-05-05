@@ -16,7 +16,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
-
+from courses.models import Enrollment
 
 
 
@@ -98,5 +98,20 @@ class StripeWebhookView(View):
                 # Grant access (e.g., enroll user in course) – we can do that next
             except Payment.DoesNotExist:
                 return JsonResponse({'error': 'Payment not found'}, status=404)
+            
+
+
+            try:
+                payment = Payment.objects.get(stripe_payment_intent_id=payment_intent_id)
+                payment.status = "succeeded"
+                payment.save()
+
+                Enrollment.objects.get_or_create(
+                    user= payment.user,
+                    course= payment.course
+
+                )
+            except Payment.DoesNotExist:
+                return JsonResponse({"error":"Payment not found"}, status= 404)    
 
         return HttpResponse(status=200)    

@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 import pyotp
+#from courses.models import Course
 #from django.contrib.auth import get_user_model
 
 #User = get_user_model()
@@ -43,6 +44,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_verified = models.BooleanField(default=False)
     is_2fa_enabled = models.BooleanField(default=False)
     otp_secret = models.CharField(max_length=16, blank=True, null=True)
+    #course = models.ForeignKey("courses.Course" , on_delete=models.CASCADE , name= "user_courses")
 
 
 
