@@ -17,6 +17,7 @@ from django.core.mail import send_mail
 from django.urls import reverse
 from .utils import log_user_activity
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
+from users.tasks import send_welcome_email
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
@@ -62,6 +63,7 @@ class VerifyEmailView(APIView):
               if user and not user.is_verified:
                  user.is_verified = True
                  user.save()
+                 send_welcome_email.delay(user.id)
                  return Response({"detail" : "Email Verified"})
               return Response({"detail":"Invalid or expired token"}, status=status.HTTP_400_BAD_REQUEST)  
          
