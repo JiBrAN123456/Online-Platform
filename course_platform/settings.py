@@ -220,3 +220,8 @@ CACHES = {
 
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+
+STRIPE_SECRET_KEY = "sk_test_your_secret_key_here"
+STRIPE_PUBLISHABLE_KEY = "pk_test_your_publishable_key_here"
+STRIPE_WEBHOOK_SECRET = "whsec_your_webhook_secret_here"
