@@ -7,7 +7,7 @@ User = get_user_model()
 
 
 
-class Transaction:
+class Transaction(models.Model):
      
     STATUS_CHOICES = (("Initiated","INITIATED"),
                       ("completed","COMPLETED"),
@@ -34,9 +34,9 @@ class Payment(models.Model):
         ("razorpay", "Razorpay")
     ]
 
-    transaction = models.OneToOneField(Transaction, on_delete=models.CASCADE, related_name='payment')
-    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)
-    payment_reference = models.CharField(max_length=100, unique=True)
+    transaction = models.OneToOneField('payments.Transaction', on_delete=models.CASCADE, related_name='payment')
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES , default= "Crypto")
+    payment_reference = models.CharField(max_length=100, unique=True, null=True)
     paid_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

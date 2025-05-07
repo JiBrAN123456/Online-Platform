@@ -4,9 +4,9 @@ from .models import CourseReview , Course , Lesson , LessonComment , LessonLike 
 
 admin.site.register(CourseReview)
 
-admin.site.register(Course)
+#admin.site.register(Course)
 
-admin.site.register(Lesson)
+#admin.site.register(Lesson)
 
 admin.site.register(LessonLike)
 
