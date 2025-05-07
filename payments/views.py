@@ -18,6 +18,8 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from courses.models import Enrollment
 from rest_framework import viewsets, permissions
+from .services import create_paypal_order
+
 
 
 
@@ -132,4 +134,13 @@ class TransactionViewset(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user= self.request.user, status= "completed")
 
-        
+
+
+
+def create_payment_view(request):
+
+    order = create_paypal_order(amount=20.00)
+    for link in order['links']:
+        if link['rel'] == 'approve':
+            return JsonResponse({'redirect_url': link['href']})
+    return JsonResponse({"error": "No approval URL found"}, status=400)    
