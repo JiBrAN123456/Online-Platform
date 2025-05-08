@@ -17,6 +17,9 @@ from courses.models import Course, Enrollment
 import stripe
 import requests
 
+from rest_framework.permissions import IsAuthenticated
+
+
 stripe.api_key = settings.STRIPE_SECRET_KEY
 endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
 
