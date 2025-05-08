@@ -231,3 +231,19 @@ STRIPE_WEBHOOK_SECRET = "whsec_your_webhook_secret_here"
 PAYPAL_CLIENT_ID = 'your-client-id'
 PAYPAL_CLIENT_SECRET = 'your-client-secret'
 PAYPAL_API_BASE = 'https://api-m.sandbox.paypal.com'  # switch to live later
+
+
+
+
+
+ASGI_APPLICATION = 'course_platform.asgi.application'
+
+# Channel layer backend for Redis
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)],
+        },
+    },
+}

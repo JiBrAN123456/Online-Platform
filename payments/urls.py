@@ -1,11 +1,22 @@
+# payments/urls.py
 from django.urls import path
-from .views import CreatePaymentView , CreatePaymentIntentView , StripeWebhookView , capture_order
-from . import views
+from rest_framework.routers import DefaultRouter
+from .views import (
+    CreateStripePaymentIntentView,
+    StripeWebhookView,
+    create_paypal_payment,
+    capture_paypal_order,
+    TransactionViewSet,
+)
+
+router = DefaultRouter()
+router.register(r'transactions', TransactionViewSet, basename='transaction')
 
 urlpatterns = [
-    path('create/', CreatePaymentView.as_view(), name='create-payment'),
-    path('create-intent/', CreatePaymentIntentView.as_view(), name='create-payment-intent'),
-    path('webhook/', StripeWebhookView.as_view(), name='stripe-webhook'),
-    path('start/', views.create_payment_view, name='create-payment'),
-    path('paypal/capture/', capture_order, name='paypal-capture'),
+    path('stripe/create-intent/', CreateStripePaymentIntentView.as_view(), name='create-stripe-intent'),
+    path('stripe/webhook/', StripeWebhookView.as_view(), name='stripe-webhook'),
+    path('paypal/create-payment/', create_paypal_payment, name='create-paypal-payment'),
+    path('paypal/capture/', capture_paypal_order, name='capture-paypal-order'),
 ]
+
+urlpatterns += router.urls
