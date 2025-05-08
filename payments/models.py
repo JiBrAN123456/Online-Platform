@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from courses.models import Course
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -43,3 +44,23 @@ class Payment(models.Model):
         return f"{self.transaction.user.email} - {self.payment_method} - {self.payment_reference}"
 
     
+class Coupon(models.Model):
+    code = models.CharField(max_length=20 , unique=True)
+    discount_percent = models.PositiveBigIntegerField(help_text="Enter discount as a percentage (e.g., 10 for 10%)")
+    active = models.BooleanField(default=True)
+    usage_limit = models.PositiveIntegerField(null=True, blank=True, help_text="Leave blank for unlimited use")
+    used_count = models.PositiveIntegerField(default=0)
+    valid_from = models.DateTimeField()
+    valid_to = models.DateTimeField()    
+
+
+    def is_valid(self):
+        now = timezone.now()
+        return(
+            self.active
+            and self.valid_from <= now <= self.valid_to
+            and (self.usage_limit is None or self.used_count < self.usage_limit)
+        )
+    
+    def __str__(self):
+        return self.code

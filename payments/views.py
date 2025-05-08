@@ -19,9 +19,9 @@ from django.views import View
 from courses.models import Enrollment
 from rest_framework import viewsets, permissions
 from .services import create_paypal_order
-
-
-
+from django.utils import timezone
+from rest_framework.decorators import api_view, permission_classes
+import requests
 
 class CreatePaymentView(generics.CreateAPIView):
     serializer_class = PaymentSerializer
@@ -144,3 +144,57 @@ def create_payment_view(request):
         if link['rel'] == 'approve':
             return JsonResponse({'redirect_url': link['href']})
     return JsonResponse({"error": "No approval URL found"}, status=400)    
+
+
+def get_paypal_access_token():
+    res = requests.post(
+        'https://api-m.sandbox.paypal.com/v1/oauth2/token',
+        auth=(settings.PAYPAL_CLIENT_ID, settings.PAYPAL_SECRET),
+        headers={'Accept': 'application/json', 'Accept-Language': 'en_US'},
+        data={'grant_type': 'client_credentials'},
+    )
+    return res.json().get('access_token')
+
+# 2. Capture Order
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@csrf_exempt
+def capture_order(request):
+    order_id = request.data.get('orderID')
+    access_token = get_paypal_access_token()
+
+    # Capture the order
+    response = requests.post(
+        f'https://api-m.sandbox.paypal.com/v2/checkout/orders/{order_id}/capture',
+        headers={
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {access_token}',
+        },
+    )
+
+    data = response.json()
+    if response.status_code != 201:
+        return Response({'error': 'Capture failed', 'details': data}, status=400)
+
+    transaction_id = data['purchase_units'][0]['payments']['captures'][0]['id']
+    amount = data['purchase_units'][0]['payments']['captures'][0]['amount']['value']
+    currency = data['purchase_units'][0]['payments']['captures'][0]['amount']['currency_code']
+
+    # Save transaction
+    transaction = Transaction.objects.create(
+        user=request.user,
+        method='paypal',
+        status='completed',
+        amount=amount,
+        currency=currency,
+        transaction_id=transaction_id,
+    )
+
+    # Save payment
+    Payment.objects.create(
+        transaction=transaction,
+        payment_reference=order_id,
+        paid_at=timezone.now(),
+    )
+
+    return Response({'status': 'Payment successful'})
