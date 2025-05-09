@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',  # Optional if you're using token-based auth too
     'social_django',
     "channels",
+    "notifications",
 ]
 
 MIDDLEWARE = [
