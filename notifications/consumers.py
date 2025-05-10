@@ -13,7 +13,7 @@ class NotificationsConsumer(AsyncWebsocketConsumer):
             await self.close()
         else:
             self.group_name = f"user+{self.user.id}"
-            await self.channel_layer.group_add(self.hroup_name, self.channel_name)
+            await self.channel_layer.group_add(self.group_name, self.channel_name)
             await self.accept()
 
 
