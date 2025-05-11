@@ -26,17 +26,16 @@ class CourseReviewListCreateView(generics.RetrieveUpdateDestroyAPIView):
 
     def perform_create(self, serializer):
         review = serializer.save(user=self.request.user, course_id=self.kwargs.get("course_id"))
-
-    # Notify course instructor
         instructor = review.course.instructor
+ 
         if instructor != self.request.user:
-            Notification.objects.create(
+            create_notification(
             recipient=instructor,
             actor=self.request.user,
             verb="left a review on your course",
-            target=review.course
-        )
-
+            target=review,
+            description=review.review,
+            url=f"/courses/{review.course.id}/")
 
 class LessonCommentListCreateView(generics.ListCreateAPIView):
     serializer_class = LessonCommentSerializer
@@ -53,15 +52,14 @@ class LessonCommentListCreateView(generics.ListCreateAPIView):
 
     # Send notification if it's a reply
         
-if comment.parent and comment.parent.user != self.request.user:
-    create_notification(
-        recipient=comment.parent.user,
-        actor=self.request.user,
-        verb="replied to your comment",
-        target=comment,
-        description=comment.comment,
-        url=f"/lessons/{comment.lesson.id}/"
-    )
+        if comment.parent and comment.parent.user != self.request.user:
+           create_notification(
+           recipient=comment.parent.user,
+           actor=self.request.user,
+           verb="replied to your comment",
+           target=comment,
+           description=comment.comment,
+           url=f"/lessons/{comment.lesson.id}/" )
 
 class LessonLikeCreateView(generics.CreateAPIView):
     serializer_class = LessonLikeSerializer
@@ -138,12 +136,14 @@ class BookmarkListCreateView(generics.ListCreateAPIView):
         if hasattr(content_object, 'instructor'):
            instructor = content_object.instructor
            if instructor != self.request.user:
-            Notification.objects.create(
-                recipient=instructor,
-                actor=self.request.user,
-                verb="bookmarked your content",
-                target=content_object
-            )
+             create_notification(
+             recipient=instructor,
+             actor=self.request.user,
+             verb="bookmarked your content",
+             target=content_object,
+             description=str(content_object),
+             url=f"/courses/{content_object.id}/" if hasattr(content_object, 'id') else None)
+
 
 
 class BookmarkDeleteView(generics.DestroyAPIView):
