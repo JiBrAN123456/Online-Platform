@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.contenttypes.models import ContentType
 from rest_framework.exceptions import PermissionDenied
+from .utility import create_notification
 
 class IsOwnerOrReadOnly(BasePermission):
     def has_permission(self, request, view,obj):
@@ -51,15 +52,16 @@ class LessonCommentListCreateView(generics.ListCreateAPIView):
         comment = serializer.save(user=self.request.user, lesson_id=self.kwargs.get("lesson_id"))
 
     # Send notification if it's a reply
-        if comment.parent:
-           if comment.parent.user != self.request.user:
-                Notification.objects.create(
-                recipient=comment.parent.user,
-                actor=self.request.user,
-                verb="replied to your comment",
-                target=comment.parent
-            )
-
+        
+if comment.parent and comment.parent.user != self.request.user:
+    create_notification(
+        recipient=comment.parent.user,
+        actor=self.request.user,
+        verb="replied to your comment",
+        target=comment,
+        description=comment.comment,
+        url=f"/lessons/{comment.lesson.id}/"
+    )
 
 class LessonLikeCreateView(generics.CreateAPIView):
     serializer_class = LessonLikeSerializer
