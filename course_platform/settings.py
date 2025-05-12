@@ -233,6 +233,9 @@ PAYPAL_CLIENT_ID = 'your-client-id'
 PAYPAL_CLIENT_SECRET = 'your-client-secret'
 PAYPAL_API_BASE = 'https://api-m.sandbox.paypal.com'  # switch to live later
 
+RAZORPAY_KEY_ID = "rzp_test_..."
+RAZORPAY_KEY_SECRET = "your_secret"
+
 
 
 
