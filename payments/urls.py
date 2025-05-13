@@ -17,6 +17,8 @@ urlpatterns = [
     path('stripe/webhook/', StripeWebhookView.as_view(), name='stripe-webhook'),
     path('paypal/create-payment/', create_paypal_payment, name='create-paypal-payment'),
     path('paypal/capture/', capture_paypal_order, name='capture-paypal-order'),
+    path('create-razorpay-order/', CreateRazorpayOrderView.as_view()),
+    path('webhook/razorpay/', razorpay_webhook),
 ]
 
 urlpatterns += router.urls
