@@ -39,6 +39,9 @@ class Payment(models.Model):
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES , default= "Crypto")
     payment_reference = models.CharField(max_length=100, unique=True, null=True)
     paid_at = models.DateTimeField(auto_now_add=True)
+    razorpay_order_id = models.CharField(max_length=100, null=True, blank=True)
+    payment_reference = models.CharField(max_length=100, null=True, blank=True)
+
 
     def __str__(self):
         return f"{self.transaction.user.email} - {self.payment_method} - {self.payment_reference}"
