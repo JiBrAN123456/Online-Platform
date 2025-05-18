@@ -114,4 +114,6 @@ class NotificationSerializer(serializers.Serializer):
         model = Notification
         fields = [ "id" , "user" ,"title","message","is_read","created_at"]
 
+        
+
 
