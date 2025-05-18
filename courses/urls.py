@@ -22,6 +22,8 @@ urlpatterns = [
     path('dashboard/', StudentDashboardView.as_view(), name="student-dashboard"),
     path('courses/', CourseListAPIView.as_view(), name='course-list'),
     path('courses/featured/', FeaturedCoursesAPIView.as_view(), name='featured-courses'),
+
+    
     # DRF router urls
     path('', include(router.urls)),
 ]
